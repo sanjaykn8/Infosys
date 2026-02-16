@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="animated-text">Voice Assistant</h1>
+<p class="muted">Server listens through the local microphone attached to this machine.</p>
+
+<div style="margin-top:25px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+
+    <button id="serverMicBtn" class="neumorph" onclick="serverListen()">
+        <span class="icon-bubble">🎤</span>
+        Server Listen
+    </button>
+
+    <input id="typedCmd"
+           placeholder="Type a command (e.g. 'check inbox')"
+           style="flex:1; min-width:220px; padding:12px; border-radius:12px;
+                  background:#0b1220; color:#fff;
+                  border:1px solid rgba(255,255,255,0.05);">
+
+    <button id="textRunBtn" class="neumorph" onclick="runText()">
+        Run
+    </button>
+</div>
+
+<div style="margin-top:35px;">
+    <h3>You Said</h3>
+    <p id="userText" class="muted">—</p>
+
+    <h3 style="margin-top:20px;">System Response</h3>
+    <p id="responseText" class="muted">—</p>
+</div>
+
+<audio id="ttsPlayer" controls style="margin-top:18px; width:100%; display:none;"></audio>
+
+<script>
+async function serverListen(){
+    const btn = document.getElementById("serverMicBtn");
+    const userText = document.getElementById("userText");
+    const responseText = document.getElementById("responseText");
+    const player = document.getElementById("ttsPlayer");
+
+    btn.disabled = true;
+    btn.innerText = "Listening on server...";
+
+    try {
+        const res = await fetch("/server-voice", { method: "POST" });
+        const data = await res.json();
+
+        if (data.error) {
+            responseText.innerText = data.message || data.error;
+            userText.innerText = "—";
+            player.style.display = "none";
+        } else {
+            userText.innerText = data.recognized || "—";
+            responseText.innerText = data.response || "—";
+
+            if (data.audio_url) {
+                player.src = data.audio_url + "?t=" + Date.now();
+                player.style.display = "block";
+                try { await player.play(); } catch(e){}
+            } else {
+                player.style.display = "none";
+            }
+        }
+    } catch (err) {
+        responseText.innerText = "Server error: " + (err.message || err);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "🎤 Server Listen";
+    }
+}
+
+async function runText(){
+    const cmd = document.getElementById("typedCmd").value.trim();
+    if (!cmd) return alert("Type a command first.");
+
+    const userText = document.getElementById("userText");
+    const responseText = document.getElementById("responseText");
+
+    userText.innerText = cmd;
+
+    try {
+        const res = await fetch("/process-command", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ command: cmd })
+        });
+        const data = await res.json();
+        responseText.innerText = data.response;
+    } catch (e) {
+        responseText.innerText = "Error: " + e.message;
+    }
+}
+</script>
+
+{% endblock %}
