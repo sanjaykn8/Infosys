@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="animated-text">Welcome to Voice AI</h1>
+<p class="muted">Login to access your voice-powered assistant.</p>
+
+<div style="margin-top:30px; display:flex; flex-direction:column; gap:16px; max-width:420px;">
+
+    <a href="{{ url_for('login', provider='google') }}" class="neumorph">
+        <span class="icon-bubble">G</span>
+        Continue with Google
+    </a>
+
+    <a href="{{ url_for('login', provider='microsoft') }}" class="neumorph">
+        <span class="icon-bubble">MS</span>
+        Continue with Microsoft
+    </a>
+
+</div>
+
+{% endblock %}

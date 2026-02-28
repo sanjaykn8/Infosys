@@ -1,0 +1,9 @@
+.env
+.db
+<<<<<<< HEAD
+static/
+core/credentials.json
+instance/
+=======
+static/
+>>>>>>> ebe7d90a89024d54a29f00b887fa49ad483a3e9b

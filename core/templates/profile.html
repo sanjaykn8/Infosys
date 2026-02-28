@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="animated-text">Profile</h1>
+
+<div style="margin-top:20px; line-height:1.8;">
+    <p><strong>Name:</strong> {{ current_user.name }}</p>
+    <p><strong>Email:</strong> {{ current_user.email }}</p>
+    <p><strong>Language:</strong> {{ current_user.language }}</p>
+</div>
+
+<hr style="margin:30px 0; border-color:rgba(255,255,255,0.05);">
+
+<h3>Preferences</h3>
+
+<form id="prefsForm" style="margin-top:15px; max-width:320px; display:flex; flex-direction:column; gap:12px;">
+    <label class="muted">Language</label>
+    <select name="language" style="padding:10px; border-radius:10px; background:#0b1220; color:#fff; border:1px solid rgba(255,255,255,0.05);">
+        <option value="en" {% if current_user.language == "en" %}selected{% endif %}>English</option>
+        <option value="hi">Hindi</option>
+        <option value="ta">Tamil</option>
+    </select>
+
+    <button type="submit" class="neumorph" style="margin-top:10px;">
+        Save Preferences
+    </button>
+</form>
+
+<p id="status" class="muted" style="margin-top:15px;"></p>
+
+<script>
+document.getElementById("prefsForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    const language = this.language.value;
+
+    const res = await fetch("/update-profile", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ language })
+    });
+
+    const data = await res.json();
+    document.getElementById("status").innerText = data.message;
+});
+</script>
+
+{% endblock %}

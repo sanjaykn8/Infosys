@@ -1,0 +1,314 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title if title else "Voice AI" }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-0: #030406;        /* page base (very dark) */
+      --bg-1: #071021;        /* deep card background */
+      --accent: #5eead4;      /* teal accent */
+      --accent-2: #60a5fa;    /* blue accent */
+      --muted: #94a3b8;
+      --card: rgba(255,255,255,0.03);
+      --glass: rgba(255,255,255,0.02);
+      --glass-2: rgba(255,255,255,0.04);
+      --text: #e6eef8;
+      --shadow: 0 8px 30px rgba(2,6,23,0.7);
+      --radius: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;
+    }
+
+    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 16.5px;
+      line-height: 1.65;
+      background: linear-gradient(180deg, var(--bg-0) 0%, #06070a 50%, #071022 100%);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    /* Parallax layers */
+    .parallax-wrap {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .parallax-layer {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      will-change: transform, opacity;
+      mix-blend-mode: screen;
+      opacity: 0.9;
+    }
+    .layer-1 {
+      top: -10vh;
+      width: 140vw;
+      height: 70vh;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(96,165,250,0.12), transparent 20%),
+        radial-gradient(ellipse at 80% 80%, rgba(94,234,212,0.08), transparent 20%);
+      filter: blur(60px);
+    }
+    .layer-2 {
+      top: 20vh;
+      width: 120vw;
+      height: 45vh;
+      background: radial-gradient(circle at 50% 50%, rgba(96,165,250,0.06), transparent 30%);
+      filter: blur(40px);
+      opacity: 0.7;
+    }
+    .layer-3 {
+      bottom: -15vh;
+      width: 200vw;
+      height: 30vh;
+      background: linear-gradient(90deg, rgba(8,10,20,0.6), rgba(0,0,0,0));
+      filter: blur(18px);
+      opacity: 0.6;
+    }
+
+    /* Navigation */
+    nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 36px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(6px);
+    }
+    nav .brand { display: flex; align-items: center; gap: 12px; }
+    nav .brand .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      box-shadow: 0 6px 18px rgba(50,120,200,0.12), inset 0 -6px 18px rgba(255,255,255,0.02);
+      display: inline-block;
+    }
+    nav h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #7dd3fc, #60a5fa, #5eead4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 0;
+    }
+    nav .navlinks a { color: var(--muted); text-decoration: none; margin-left: 18px; font-weight: 600; }
+    nav .navlinks a:hover { color: var(--text); }
+
+    /* Layout */
+    .container {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 48px 24px;
+      min-height: calc(100vh - 84px);
+    }
+
+    /* Card */
+    .card {
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--glass-2);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Headings */
+    h1, h2, h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      margin: 0 0 14px 0;
+      letter-spacing: 0.4px;
+      color: var(--text);
+    }
+    h1 { font-size: 30px; font-weight: 700; }
+    h2 { font-size: 22px; font-weight: 600; }
+    h3 { font-size: 18px; font-weight: 600; }
+
+    p { font-size: 16px; margin: 0; }
+    p.muted { color: var(--muted); margin: 8px 0 0 0; font-size: 15px; font-weight: 400; }
+
+    /* Animated / slide in text */
+    .animated-text {
+      display: inline-block;
+      background: linear-gradient(90deg, #7dd3fc, #60a5fa 40%, #5eead4 70%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: slideIn 700ms ease forwards;
+    }
+    @keyframes slideIn { to { opacity: 1; transform: none; } }
+
+    /* Neumorphic button */
+    .neumorph {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 8px 8px 20px rgba(0,0,0,0.6), -8px -8px 20px rgba(255,255,255,0.02);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+      font-weight: 600;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+    }
+    .neumorph:hover { transform: translateY(-3px); box-shadow: 10px 12px 26px rgba(0,0,0,0.65), -6px -6px 16px rgba(255,255,255,0.02); }
+
+    /* Small icon bubble useful for mic */
+    .icon-bubble {
+      display: inline-flex;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(96,165,250,0.12), rgba(94,234,212,0.06));
+      color: var(--text);
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(2,6,23,0.6);
+    }
+
+    /* Tooltip */
+    .tooltip { position: relative; display: inline-block; cursor: help; }
+    .tooltip .tt {
+      visibility: hidden;
+      opacity: 0;
+      width: max-content;
+      max-width: 300px;
+      background: rgba(2,6,23,0.9);
+      color: var(--text);
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 8px;
+      position: absolute;
+      z-index: 30;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: opacity .18s ease, transform .18s ease;
+      font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .tooltip:hover .tt { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+    /* Tiny helpers */
+    .row { display: flex; gap: 12px; align-items: center; }
+    .col { display: flex; flex-direction: column; gap: 8px; }
+    .muted-italic { color: var(--muted); font-size: 13px; font-style: italic; }
+
+    footer {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 28px 6px;
+      z-index: 5;
+      position: relative;
+    }
+
+    input, select, textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      nav { padding: 12px 18px; }
+      .card { padding: 20px; margin: 18px; border-radius: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- visual parallax layers (pure CSS blobs) -->
+  <div class="parallax-wrap" aria-hidden="true">
+    <div class="parallax-layer layer-1" data-speed="0.08"></div>
+    <div class="parallax-layer layer-2" data-speed="0.04"></div>
+    <div class="parallax-layer layer-3" data-speed="-0.02"></div>
+  </div>
+
+  <nav>
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <h2>VoiceAI</h2>
+    </div>
+    <div class="navlinks">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('voice_page') }}">Voice</a>
+        <a href="{{ url_for('profile_page') }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('index') }}">Home</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="card">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer>
+    Built for demo. Audio runs on your local machine where the Flask server is running.
+  </footer>
+
+  <script>
+    // Parallax: translateY layers based on scroll (simple and lightweight)
+    (function(){
+      const layers = Array.from(document.querySelectorAll('.parallax-layer'));
+      function onScroll(){
+        const y = window.scrollY || window.pageYOffset;
+        layers.forEach(layer => {
+          const speed = parseFloat(layer.dataset.speed) || 0.04;
+          layer.style.transform = `translate3d(-50%, ${y * speed}px, 0)`;
+        });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    // Auto-animate elements with .animated-text on load
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.animated-text').forEach((el, i) => {
+        el.style.animationDelay = (i * 120) + 'ms';
+      });
+    });
+  </script>
+</body>
+</html>
